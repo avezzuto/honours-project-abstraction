@@ -1,0 +1,11 @@
+dd
+numpy
+keras
+keras-applications
+keras-preprocessing
+matplotlib
+scikit-image
+tensorflow
+tensorflow-federated
+scipy
+scikit-learn
