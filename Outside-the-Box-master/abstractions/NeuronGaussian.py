@@ -1,4 +1,5 @@
 import math
+import numpy as np
 
 
 class NeuronGaussian:
@@ -10,13 +11,26 @@ class NeuronGaussian:
     def add(self, value):
         self.set.append(value)
 
-    def vote(self, x):
-        # Calculate mean and variance
-        mean = sum(self.set) / len(self.set)
-        variance = sum((point - mean) ** 2 for point in self.set) / len(self.set)
-        std_dev = math.sqrt(variance)
+    def calculate_distribution(self):
+        points = np.array(self.set)
+        mean = np.mean(points, axis=0)
+        covariance_matrix = np.cov(points, rowvar=False)
 
-        if mean - self.k * std_dev <= x <= mean + self.k * std_dev:
+        return mean, covariance_matrix
+
+    def vote(self, x):
+        mean, cov = self.calculate_distribution()
+
+        # Calculation of Mahalanobis distance
+        if cov.shape == ():
+            variance = sum((point - mean) ** 2 for point in self.set) / len(self.set)
+            DM = math.sqrt(variance)
+        else:
+            delta = x - mean
+            distance_squared = np.dot(np.dot(delta, np.linalg.inv(cov)), delta.T)
+            DM = np.sqrt(distance_squared)
+
+        if DM < self.k:
             return True
 
         return False

@@ -8,6 +8,7 @@ from .NeuronGaussian import NeuronGaussian
 
 
 class GaussianBasedAbstraction(Abstraction):
+
     def __init__(self, n, threshold):
         self.votes = 0
         self.neuron_list = [NeuronGaussian(k=2) for _ in range(n)]
