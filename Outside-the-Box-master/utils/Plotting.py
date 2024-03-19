@@ -224,7 +224,7 @@ def plot_monitor_training(monitor, history, iterations, scores, best_scores, fp_
 
 
 def plot_2d_projection(history, monitor, layer, category_title, ax=None, known_classes=None, novelty_marker="$N$",
-                       dimensions=None):
+                       dimensions=None, novelty=[]):
     if ax is None:
         ax = plt.figure().add_subplot()
     m_id = 0 if monitor is None else monitor.id()
@@ -279,8 +279,8 @@ def plot_2d_projection(history, monitor, layer, category_title, ax=None, known_c
             continue
         ax.scatter(xs, ys, alpha=0.5, label="c" + str(cj), c=color, marker=marker)
     # plot novelties last
-    for xs, ys in novelties:
-        ax.scatter(xs, ys, alpha=1.0, label="novelty", c=["k"], marker=novelty_marker, zorder=3)
+    for point in novelty:
+        ax.scatter(point[0], point[1], alpha=1.0, label="novelty", c=["k"], marker=novelty_marker, zorder=3)
 
     # ax.legend()
     plt.draw()
