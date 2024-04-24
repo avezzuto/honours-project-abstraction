@@ -1,9 +1,12 @@
 from . import *
+from .iris import iris
 
 
 def get_model_loader(name: str, model_path):
     if name == "GTSRB":
         model_constructor = GTSRB_CNY19
+    elif name == "iris":
+        model_constructor = iris
     elif name == "MNIST":
         model_constructor = MNIST_CNY19
     elif name == "F_MNIST":

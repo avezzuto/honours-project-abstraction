@@ -76,6 +76,14 @@ def instance_MNIST():
     return model_name, data_name, stored_network_name, total_classes
 
 
+def instance_iris():
+    model_name = "iris"
+    data_name = "iris"
+    stored_network_name = "CNY19id1_MNIST"
+    total_classes = 3
+    return model_name, data_name, stored_network_name, total_classes
+
+
 def instance_F_MNIST():
     model_name = "F_MNIST"
     data_name = "F_MNIST"

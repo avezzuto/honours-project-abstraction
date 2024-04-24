@@ -4,6 +4,7 @@ from time import time
 
 from utils import *
 from models.ModelLoader import get_model_loader
+from utils import DataSpec
 
 
 def get_model(model_name: str, data_train: DataSpec, data_test: DataSpec, n_classes, model_trainer, n_epochs,

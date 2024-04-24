@@ -3,7 +3,7 @@ from run.experiment_helper import *
 
 
 def run_script():
-    model_name, data_name, stored_network_name, total_classes = instance_MNIST()
+    model_name, data_name, stored_network_name, total_classes = instance_iris()
     classes = [0, 1]
     n_classes = 2
     classes_string = classes2string(classes)
