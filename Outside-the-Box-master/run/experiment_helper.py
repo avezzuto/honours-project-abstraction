@@ -79,7 +79,7 @@ def instance_MNIST():
 def instance_iris():
     model_name = "iris"
     data_name = "iris"
-    stored_network_name = "CNY19id1_MNIST"
+    stored_network_name = "iris_neural_network"
     total_classes = 3
     return model_name, data_name, stored_network_name, total_classes
 
