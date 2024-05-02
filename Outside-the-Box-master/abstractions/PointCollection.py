@@ -1,5 +1,5 @@
 from scipy.spatial.distance import euclidean
-from scipy.spatial.distance import manhattan
+from scipy.spatial.distance import cityblock
 
 from utils import *
 
@@ -63,8 +63,8 @@ class PointCollection(object):
     def manhattan_distance(self, point, epsilon, epsilon_relative):
         closest_point = self.get_closest_point(point, epsilon, epsilon_relative)
         assert list(point) != closest_point, "Confidence for points inside the set should not be asked for!"
-        dist = manhattan(point, closest_point)
-        radius = manhattan(closest_point, self.center())
+        dist = cityblock(point, closest_point)
+        radius = cityblock(closest_point, self.center())
         if radius == 0.0:
             # corner case: the set consists of a single point only
             confidence = dist

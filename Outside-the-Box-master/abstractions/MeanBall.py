@@ -1,5 +1,5 @@
 from matplotlib.patches import Circle
-from scipy.spatial.distance import euclidean, manhattan
+from scipy.spatial.distance import euclidean, cityblock
 
 from .PointCollection import PointCollection
 from utils import *
@@ -110,7 +110,7 @@ class MeanBall(PointCollection):
         return confidence
 
     def manhattan_distance(self, point, epsilon, epsilon_relative):
-        dist = manhattan(self.center, point)
+        dist = cityblock(self.center, point)
         radius = self._radius(epsilon, epsilon_relative)
         assert dist >= radius, "Confidence for points inside the set should not be asked for!"
         if radius == 0.0:
