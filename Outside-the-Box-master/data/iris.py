@@ -22,8 +22,8 @@ def load_iris(data_train_model: DataSpec, data_test_model: DataSpec, data_train_
     y_test = dataset_test[:1][0]
 
     # Reshaping the array to 4-dims so that it can work with the Keras API
-    x_train = x_train.reshape(x_train.shape[0], 28, 28, 1)
-    x_test = x_test.reshape(x_test.shape[0], 28, 28, 1)
+    """x_train = x_train.reshape(x_train.shape[0], 28, 28, 1)
+    x_test = x_test.reshape(x_test.shape[0], 28, 28, 1)"""
 
     data_train_model.set_data(x=x_train, y=y_train)
     data_train_monitor.set_data(x=x_train, y=y_train)
