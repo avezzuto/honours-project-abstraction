@@ -11,15 +11,15 @@ def load_iris(data_train_model: DataSpec, data_test_model: DataSpec, data_train_
     data_train_filename = "C:/Users/andre/Downloads/Outside-the-Box-master/Outside-the-Box-master/data/Iris/training_iris.csv"
     data_test_filename = "C:/Users/andre/Downloads/Outside-the-Box-master/Outside-the-Box-master/data/Iris/testing_iris.csv"
 
-    dataset_train = np.array(list(csv.reader(open(data_train_filename))))
+    dataset_train = np.array(list(csv.reader(open(data_train_filename))))[1:]
 
-    x_train = dataset_train[1:]
-    y_train = dataset_train[:1][0]
+    x_train = dataset_train[:, :4]
+    y_train = dataset_train[:, 4:]
 
-    dataset_test = np.array(list(csv.reader(open(data_test_filename))))
+    dataset_test = np.array(list(csv.reader(open(data_test_filename))))[1:]
 
-    x_test = dataset_test[1:]
-    y_test = dataset_test[:1][0]
+    x_test = dataset_test[:, :4]
+    y_test = dataset_test[:, 4:]
 
     # Reshaping the array to 4-dims so that it can work with the Keras API
     """x_train = x_train.reshape(x_train.shape[0], 28, 28, 1)
