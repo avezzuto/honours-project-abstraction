@@ -4,8 +4,8 @@ from run.experiment_helper import *
 
 def run_script():
     model_name, data_name, stored_network_name, total_classes = instance_iris()
-    classes = [0, 1]
-    n_classes = 2
+    classes = [0, 1, 2]
+    n_classes = 3
     classes_string = classes2string(classes)
     model_path = "{}_{}.h5".format(stored_network_name, classes_string)
     data_train_model = DataSpec(randomize=False, classes=classes)
