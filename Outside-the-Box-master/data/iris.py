@@ -16,10 +16,14 @@ def load_iris(data_train_model: DataSpec, data_test_model: DataSpec, data_train_
     x_train = dataset_train[:, :4]
     y_train = dataset_train[:, 4:]
 
+    _, y_train = np.unique(y_train, return_inverse=True)
+
     dataset_test = np.array(list(csv.reader(open(data_test_filename))))[1:]
 
     x_test = dataset_test[:, :4]
     y_test = dataset_test[:, 4:]
+
+    _, y_test = np.unique(y_test, return_inverse=True)
 
     # Reshaping the array to 4-dims so that it can work with the Keras API
     """x_train = x_train.reshape(x_train.shape[0], 28, 28, 1)

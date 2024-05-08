@@ -3,7 +3,7 @@ import tensorflow.keras as kr
 from tensorflow.keras import Input
 
 
-def iris(classes, input_shape, weights=None):
+def iris():
     model = kr.models.Sequential()
     model.add(Input(shape=(4,)))
     # Add an initial layer with 4 input nodes, and a hidden layer with 16 nodes.
@@ -15,5 +15,6 @@ def iris(classes, input_shape, weights=None):
     # Use the softmax activation function there.
     model.add(kr.layers.Activation("softmax"))
     model.compile(optimizer="adam", loss="categorical_crossentropy", metrics=["accuracy"])
+
 
     return model
