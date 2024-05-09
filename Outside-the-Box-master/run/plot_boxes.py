@@ -1,6 +1,9 @@
+import matplotlib.pyplot as plt
+from scipy.stats import multivariate_normal
+
+from abstractions.GaussianBasedAbstraction import GaussianBasedAbstraction
 from data import *
 from run.experiment_helper import *
-from trainers import *
 from models import iris
 
 
@@ -40,7 +43,13 @@ def run_script():
     layer2values, _ = obtain_predictions(model=model, data=data_run, layers=[layer])
     history.set_layer2values(layer2values)
     plot_2d_projection(history=history, monitor=monitor, layer=layer, category_title=model_name, known_classes=classes,
-                       novelty_marker="*")
+                       novelty_marker="*", dimensions=[1, 2])
+
+    n = 2
+    threshold = 3
+    abstraction = GaussianBasedAbstraction(n, threshold)
+    data = np.array(layer2values.get(layer))
+    abstraction.run_gaussian(data)
 
     save_all_figures()
 

@@ -66,7 +66,8 @@ def run_script():
     n = 2
     threshold = 3
     abstraction = GaussianBasedAbstraction(n, threshold)
-    abstraction.run_gaussian(novelty)
+    data = np.array(layer2values.get(layer))
+    abstraction.run_gaussian(data)
 
     save_all_figures(close=True)
 
