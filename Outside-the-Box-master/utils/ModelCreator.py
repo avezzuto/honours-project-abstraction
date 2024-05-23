@@ -1,24 +1,25 @@
+import os
 from os.path import isfile
-from tensorflow_core.python.keras.models import load_model as tf_load_model
 from time import time
 
 from utils import *
 from models.ModelLoader import get_model_loader
-from utils import DataSpec
+from utils import DataSpec, Statistics, get_image_shape
+from tensorflow.keras.models import load_model as tf_load_model
 
 
 def get_model(model_name: str, data_train: DataSpec, data_test: DataSpec, n_classes, model_trainer, n_epochs,
               batch_size, statistics: Statistics, model_path):
     model_path, model_constructor = get_model_loader(model_name, model_path)
 
-    model_path = "../" + model_path  # go up one folder because run scripts are started from the folder "run/"
+    # model_path = ".." + model_path  # go up one folder because run scripts are started from the folder "run/"
     loaded = False
     if isfile(model_path):
-        try:
-            model, history = load_model(model_path)
-            loaded = True
-        except:
-            pass
+        # try:
+        model, history = load_model(model_path)
+        loaded = True
+        """except:
+            pass"""
 
     if not loaded:
         print("Could not load model", model_path, "- creating and training new model")
