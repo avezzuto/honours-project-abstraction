@@ -4,12 +4,12 @@ from scipy.stats import multivariate_normal
 from abstractions.GaussianBasedAbstraction import GaussianBasedAbstraction
 from data import *
 from run.experiment_helper import *
-from models import iris
+from trainers import StandardTrainer
 
 
 def run_script():
     model_name, data_name, stored_network_name, total_classes = instance_iris()
-    classes = [0, 1, 2]
+    classes = [0, 1]
     n_classes = 3
     model_path = "iris_neural_network.h5"
     data_train_model = DataSpec(randomize=False, classes=classes)
@@ -21,10 +21,10 @@ def run_script():
     all_classes_network, labels_network, all_classes_rest, labels_rest = get_data_loader(data_name)(
         data_train_model=data_train_model, data_test_model=data_test_model, data_train_monitor=data_train_monitor,
         data_test_monitor=data_test_monitor, data_run=data_run)
-    """model, _ = get_model(model_name=model_name, data_train=data_train_model, data_test=data_test_model,
-                         n_classes=n_classes, model_trainer=StandardTrainer(), n_epochs=100, batch_size=1, statistics=None,
-                         model_path=model_path)"""
-    model = iris.iris()
+
+    model, _ = get_model(model_name=model_name, data_train=data_train_model, data_test=data_test_model,
+                         n_classes=n_classes, model_trainer=StandardTrainer(), n_epochs=100, batch_size=1,
+                         statistics=Statistics(), model_path=model_path)
 
     # create monitor
     layer2abstraction = {-2: OctagonAbstraction(euclidean_distance)}
@@ -44,12 +44,6 @@ def run_script():
     history.set_layer2values(layer2values)
     plot_2d_projection(history=history, monitor=monitor, layer=layer, category_title=model_name, known_classes=classes,
                        novelty_marker="*", dimensions=[1, 2])
-
-    n = 2
-    threshold = 3
-    abstraction = GaussianBasedAbstraction(n, threshold)
-    data = np.array(layer2values.get(layer))
-    abstraction.run_gaussian(data)
 
     save_all_figures()
 
