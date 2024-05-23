@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 from scipy.stats import multivariate_normal
+from sklearn.tree import DecisionTreeClassifier
 
 from abstractions.GaussianBasedAbstraction import GaussianBasedAbstraction
 from data import *
@@ -44,6 +45,47 @@ def run_script():
     history.set_layer2values(layer2values)
     plot_2d_projection(history=history, monitor=monitor, layer=layer, category_title=model_name, known_classes=classes,
                        novelty_marker="*", dimensions=[1, 2])
+
+    pair = [1, 2]
+    plot_colors = "ryb"
+
+    X = np.array(history.layer2values[layer][:, pair])
+    y = np.array(history.ground_truths)
+
+    # Train
+    clf = DecisionTreeClassifier().fit(X, y)
+
+    # Create a mesh grid
+    x_min, x_max = X[:, 0].min() - 1, X[:, 0].max() + 1
+    y_min, y_max = X[:, 1].min() - 1, X[:, 1].max() + 1
+    xx, yy = np.meshgrid(np.arange(x_min, x_max, 0.01),
+                         np.arange(y_min, y_max, 0.01))
+
+    # Predict the class for each point in the mesh grid
+    Z = clf.predict(np.c_[xx.ravel(), yy.ravel()])
+    Z = Z.reshape(xx.shape)
+
+    # Plot the decision boundary
+    plt.figure()
+    plt.contourf(xx, yy, Z, alpha=0.3, cmap=plt.cm.RdYlBu)
+
+    # Plot the training points
+    for i, color in zip(range(n_classes), plot_colors):
+        idx = np.where(y == i)
+        plt.scatter(
+            X[idx, 0],
+            X[idx, 1],
+            c=color,
+            label=f"Class {i}",
+            edgecolor="black",
+            s=15,
+        )
+
+    plt.xlabel("Feature 1")
+    plt.ylabel("Feature 2")
+    plt.legend()
+    plt.title("Decision Boundary with Training Points")
+    plt.show()
 
     save_all_figures()
 
