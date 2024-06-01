@@ -128,23 +128,28 @@ class MonitorManager(object):
 
         return history
 
+    def refine_clusters(self, data_train, layer2values, statistics, class2values):
+        return self._clustering(data=data_train, layer2values=layer2values, statistics=statistics, class2values=class2values)
+
     # --- private --- #
 
-    def _clustering(self, data, layer2values, statistics, includes_test_data=False):
+    def _clustering(self, data, layer2values, statistics, includes_test_data=False, class2values=None):
         layers = self.layers()
 
         # cluster classes in each layer
         timer = time()
         layer2class2clusterer = dict()
+
         for layer in layers:
-            class2values = dict()  # mapping: class_index -> values from watched layer
             values = layer2values[layer]
-            for j, yj in enumerate(data.ground_truths()):
-                vj = values[j]
-                if yj in class2values:
-                    class2values[yj].append(vj)
-                else:
-                    class2values[yj] = [vj]
+            if class2values is None:
+                class2values = dict()  # mapping: class_index -> values from watched layer
+                for j, yj in enumerate(data.ground_truths()):
+                    vj = values[j]
+                    if yj in class2values:
+                        class2values[yj].append(vj)
+                    else:
+                        class2values[yj] = [vj]
 
             # find number of clusters
             print("Layer {:d}:".format(layer))

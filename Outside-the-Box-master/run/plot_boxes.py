@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+import numpy as np
 from scipy.stats import multivariate_normal
 from sklearn.tree import DecisionTreeClassifier
 
@@ -55,6 +56,25 @@ def run_script():
     # Train
     clf = DecisionTreeClassifier().fit(X, y)
 
+    predictions = clf.predict(X)
+    class_2_points = X[predictions == 2]
+    gt = y[predictions == 2]
+
+    c2v = {2: class_2_points}
+
+    data = DataSpec()
+    data.set_data(x=class_2_points, y=gt)
+
+    layer2values = {0: class_2_points}
+    monitor_manager.n_clusters = 1
+    monitor_manager._layers = [0]
+    refined = monitor_manager.refine_clusters(data_train=data,
+                                              layer2values=layer2values, statistics=Statistics(), class2values=c2v)
+
+    # This is a kmeans instance, how can I get the clustering itself?
+    kmeans = refined[0][2]
+
+
     # Create a mesh grid
     x_min, x_max = X[:, 0].min() - 1, X[:, 0].max() + 1
     y_min, y_max = X[:, 1].min() - 1, X[:, 1].max() + 1
@@ -81,8 +101,8 @@ def run_script():
             s=15,
         )
 
-    plt.xlabel("Feature 1")
-    plt.ylabel("Feature 2")
+    plt.xlabel("Dimension 1")
+    plt.ylabel("Dimension 2")
     plt.legend()
     plt.title("Decision Boundary with Training Points")
     plt.show()
