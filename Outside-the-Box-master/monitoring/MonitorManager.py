@@ -129,7 +129,10 @@ class MonitorManager(object):
         return history
 
     def refine_clusters(self, data_train, layer2values, statistics, class2values):
-        return self._clustering(data=data_train, layer2values=layer2values, statistics=statistics, class2values=class2values)
+        layer2class2clusterer = self._clustering(data=data_train, layer2values=layer2values, statistics=statistics,
+                                               class2values=class2values)
+        self._train_monitors(data=data_train, layer2values=layer2values, layer2class2clusterer=layer2class2clusterer,
+                             predictions=None, statistics=statistics, includes_test_data=False)
 
     # --- private --- #
 

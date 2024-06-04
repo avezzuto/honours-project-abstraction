@@ -60,20 +60,31 @@ def run_script():
     class_2_points = X[predictions == 2]
     gt = y[predictions == 2]
 
-    c2v = {2: class_2_points}
+    c2v = {1: class_2_points}
 
     data = DataSpec()
     data.set_data(x=class_2_points, y=gt)
 
-    layer2values = {0: class_2_points}
+    num_samples = data.y().shape[0]
+
+    # Create a zero-filled array with shape (num_samples, 1) for one-hot encoding
+    categorical = np.zeros((num_samples, 2), dtype='float32')
+
+    # Set the value at index 1 of each row to 1 (representing class 2)
+    categorical[:, 1] = 1
+
+    data.set_y(categorical)
+
+    layer2values = {2: class_2_points}
     monitor_manager.n_clusters = 1
-    monitor_manager._layers = [0]
-    refined = monitor_manager.refine_clusters(data_train=data,
-                                              layer2values=layer2values, statistics=Statistics(), class2values=c2v)
+    monitor_manager._layers = [2]
+    monitor_manager.refine_clusters(data_train=data, layer2values=layer2values,
+                                    statistics=Statistics(), class2values=c2v)
 
-    # This is a kmeans instance, how can I get the clustering itself?
-    kmeans = refined[0][2]
-
+    history.set_ground_truths(gt)
+    history.set_layer2values(layer2values)
+    plot_2d_projection(history=history, monitor=monitor, layer=layer, category_title=model_name, known_classes=classes,
+                       novelty_marker="*", dimensions=[0, 1])
 
     # Create a mesh grid
     x_min, x_max = X[:, 0].min() - 1, X[:, 0].max() + 1
