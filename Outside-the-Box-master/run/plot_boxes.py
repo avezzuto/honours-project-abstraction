@@ -50,31 +50,17 @@ def run_script():
     pair = [1, 2]
     plot_colors = "ryb"
 
-    X = np.array(history.layer2values[layer][:, pair])
-    y = np.array(history.ground_truths)
+    all_y = np.array(history.ground_truths)
+    all_x = np.array(history.layer2values[layer][:, pair])
+
+    X = all_x[(all_y == 0) | (all_y == 1)]
+    y = all_y[(all_y == 0) | (all_y == 1)]
+
+    novelty_X = all_x[(all_y == 2)]
 
     # Train
     clf = DecisionTreeClassifier().fit(X, y)
     predictions = clf.predict(X)
-
-    data = DataSpec()
-    data.set_data(x=X, y=predictions)
-    data.set_y(to_categorical(data.y(), num_classes=number_of_classes([0, 1, 2]), dtype='float32'))
-
-    c2v = {}
-    for i in range(number_of_classes([0, 1, 2])):
-        c2v[i] = X[predictions == i].tolist()
-
-    layer2values = {2: X}
-    monitor_manager.n_clusters = 1
-    monitor_manager._layers = [2]
-    monitor_manager.refine_clusters(data_train=data, layer2values=layer2values,
-                                    statistics=Statistics(), class2values=c2v)
-
-    history.set_ground_truths(y)
-    history.set_layer2values(layer2values)
-    plot_2d_projection(history=history, monitor=monitor, layer=layer, category_title=model_name, known_classes=[0, 1, 2],
-                       novelty_marker="*", dimensions=[0, 1])
 
     # Create a mesh grid
     x_min, x_max = X[:, 0].min() - 1, X[:, 0].max() + 1
@@ -107,6 +93,25 @@ def run_script():
     plt.legend()
     plt.title("Decision Boundary with Training Points")
     plt.show()
+
+    data = DataSpec()
+    data.set_data(x=X, y=predictions)
+    data.set_y(to_categorical(data.y(), num_classes=number_of_classes(classes), dtype='float32'))
+
+    c2v = {}
+    for i in range(number_of_classes(classes)):
+        c2v[i] = X[predictions == i].tolist()
+
+    layer2values = {2: X}
+    monitor_manager.n_clusters = 1
+    monitor_manager._layers = [2]
+    monitor_manager.refine_clusters(data_train=data, layer2values=layer2values,
+                                    statistics=Statistics(), class2values=c2v)
+
+    history.set_ground_truths(all_y)
+    history.set_layer2values({2: all_x})
+    plot_2d_projection(history=history, monitor=monitor, layer=layer, category_title=model_name,
+                       known_classes=classes, novelty_marker="*", dimensions=[0, 1], novelty=novelty_X)
 
     save_all_figures()
 
