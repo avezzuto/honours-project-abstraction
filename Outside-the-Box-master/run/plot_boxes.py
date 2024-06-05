@@ -55,35 +55,25 @@ def run_script():
 
     # Train
     clf = DecisionTreeClassifier().fit(X, y)
-
     predictions = clf.predict(X)
-    class_2_points = X[predictions == 2]
-    gt = y[predictions == 2]
-
-    c2v = {1: class_2_points}
 
     data = DataSpec()
-    data.set_data(x=class_2_points, y=gt)
+    data.set_data(x=X, y=predictions)
+    data.set_y(to_categorical(data.y(), num_classes=number_of_classes([0, 1, 2]), dtype='float32'))
 
-    num_samples = data.y().shape[0]
+    c2v = {}
+    for i in range(number_of_classes([0, 1, 2])):
+        c2v[i] = X[predictions == i].tolist()
 
-    # Create a zero-filled array with shape (num_samples, 1) for one-hot encoding
-    categorical = np.zeros((num_samples, 2), dtype='float32')
-
-    # Set the value at index 1 of each row to 1 (representing class 2)
-    categorical[:, 1] = 1
-
-    data.set_y(categorical)
-
-    layer2values = {2: class_2_points}
+    layer2values = {2: X}
     monitor_manager.n_clusters = 1
     monitor_manager._layers = [2]
     monitor_manager.refine_clusters(data_train=data, layer2values=layer2values,
                                     statistics=Statistics(), class2values=c2v)
 
-    history.set_ground_truths(gt)
+    history.set_ground_truths(y)
     history.set_layer2values(layer2values)
-    plot_2d_projection(history=history, monitor=monitor, layer=layer, category_title=model_name, known_classes=classes,
+    plot_2d_projection(history=history, monitor=monitor, layer=layer, category_title=model_name, known_classes=[0, 1, 2],
                        novelty_marker="*", dimensions=[0, 1])
 
     # Create a mesh grid
