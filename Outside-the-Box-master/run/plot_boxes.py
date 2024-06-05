@@ -77,7 +77,7 @@ def run_script():
     plt.contourf(xx, yy, Z, alpha=0.3, cmap=plt.cm.RdYlBu)
 
     # Plot the training points
-    for i, color in zip(range(n_classes), plot_colors):
+    for i, color in zip(range(len(classes)), plot_colors):
         idx = np.where(y == i)
         plt.scatter(
             X[idx, 0],
