@@ -1,9 +1,5 @@
-import matplotlib.pyplot as plt
-import numpy as np
-from scipy.stats import multivariate_normal
 from sklearn.tree import DecisionTreeClassifier
 
-from abstractions.GaussianBasedAbstraction import GaussianBasedAbstraction
 from data import *
 from run.experiment_helper import *
 from trainers import StandardTrainer
@@ -31,7 +27,7 @@ def run_script():
     # create monitor
     layer2abstraction = {-2: OctagonAbstraction(euclidean_distance)}
     monitor = Monitor(layer2abstraction=layer2abstraction)
-    monitor_manager = MonitorManager([monitor], n_clusters=3)
+    monitor_manager = MonitorManager([monitor], n_clusters=2)
 
     # run instance
     monitor_manager.normalize_and_initialize(model, len(labels_rest))
@@ -44,8 +40,6 @@ def run_script():
     layer = 2
     layer2values, _ = obtain_predictions(model=model, data=data_run, layers=[layer])
     history.set_layer2values(layer2values)
-    plot_2d_projection(history=history, monitor=monitor, layer=layer, category_title=model_name, known_classes=classes,
-                       novelty_marker="*", dimensions=[1, 2])
 
     pair = [1, 2]
     plot_colors = "ryb"
@@ -58,8 +52,17 @@ def run_script():
 
     novelty_X = all_x[(all_y == 2)]
 
+    plot_2d_projection(history=history, monitor=monitor, layer=layer, category_title=model_name, known_classes=classes,
+                       novelty_marker="*", dimensions=[1, 2], novelty=novelty_X)
+
     # Train
     clf = DecisionTreeClassifier().fit(X, y)
+    tree = clf.tree_
+
+    # Print the threshold values for each node in the tree
+    for i in range(tree.node_count):
+        if tree.children_left[i] != tree.children_right[i]:  # only print non-leaf nodes
+            print(f"Node {i}: feature {tree.feature[i]} <= {tree.threshold[i]}")
     predictions = clf.predict(X)
 
     # Create a mesh grid
