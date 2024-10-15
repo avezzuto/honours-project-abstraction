@@ -226,7 +226,7 @@ def plot_monitor_training(monitor, history, iterations, scores, best_scores, fp_
 def plot_2d_projection(history, monitor, layer, category_title, ax=None, known_classes=None, novelty_marker="$N$",
                        dimensions=None, novelty=[]):
     if ax is None:
-        ax = plt.figure().add_subplot()
+        ax = plt.figure(figsize=(10,8)).add_subplot()
     m_id = 0 if monitor is None else monitor.id()
     title = "Projected data & abstractions ({}) (monitor {:d}, layer {:d})".format(category_title, m_id, layer)
     ax.figure.suptitle(title)
@@ -281,7 +281,7 @@ def plot_2d_projection(history, monitor, layer, category_title, ax=None, known_c
     # plot novelties last
     for point in novelty:
         ax.scatter(point[0], point[1], alpha=1.0, label="novelty", c=["k"], marker=novelty_marker, zorder=3)
-
+    plt.tight_layout()
     # ax.legend()
     plt.draw()
     plt.pause(0.0001)
