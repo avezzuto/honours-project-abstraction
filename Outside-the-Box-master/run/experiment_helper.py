@@ -84,6 +84,14 @@ def instance_iris():
     return model_name, data_name, stored_network_name, total_classes
 
 
+def instance_wine():
+    model_name = "wine"
+    data_name = "wine"
+    stored_network_name = "wine_neural_network"
+    total_classes = 3
+    return model_name, data_name, stored_network_name, total_classes
+
+
 def instance_F_MNIST():
     model_name = "F_MNIST"
     data_name = "F_MNIST"

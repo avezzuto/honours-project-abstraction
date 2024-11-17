@@ -6,14 +6,13 @@ from trainers import StandardTrainer
 
 
 def run_script():
-    model_name, data_name, stored_network_name, total_classes = instance_iris()
-    classes = [0, 1]
-    n_classes = 3
-    model_path = "iris_neural_network.h5"
-    data_train_model = DataSpec(randomize=False, classes=classes)
-    data_test_model = DataSpec(randomize=False, classes=classes)
-    data_train_monitor = DataSpec(randomize=False, classes=classes)
-    data_test_monitor = DataSpec(randomize=False, classes=classes)
+    model_name, data_name, stored_network_name, total_classes = instance_wine()
+    known_classes = [0, 1]
+    model_path = str(stored_network_name + ".h5")
+    data_train_model = DataSpec(randomize=False, classes=known_classes)
+    data_test_model = DataSpec(randomize=False, classes=known_classes)
+    data_train_monitor = DataSpec(randomize=False, classes=known_classes)
+    data_test_monitor = DataSpec(randomize=False, classes=known_classes)
     data_run = DataSpec(randomize=False, classes=[0, 1, 2])
 
     all_classes_network, labels_network, all_classes_rest, labels_rest = get_data_loader(data_name)(
@@ -21,7 +20,7 @@ def run_script():
         data_test_monitor=data_test_monitor, data_run=data_run)
 
     model, _ = get_model(model_name=model_name, data_train=data_train_model, data_test=data_test_model,
-                         n_classes=n_classes, model_trainer=StandardTrainer(), n_epochs=100, batch_size=1,
+                         n_classes=total_classes, model_trainer=StandardTrainer(), n_epochs=100, batch_size=1,
                          statistics=Statistics(), model_path=model_path)
 
     # create monitor
@@ -52,7 +51,7 @@ def run_script():
 
     novelty_X = all_x[(all_y == 2)]
 
-    plot_2d_projection(history=history, monitor=monitor, layer=layer, category_title=model_name, known_classes=classes,
+    plot_2d_projection(history=history, monitor=monitor, layer=layer, category_title=model_name, known_classes=known_classes,
                        novelty_marker="*", dimensions=[1, 2], novelty=novelty_X)
 
     # Train
@@ -80,7 +79,7 @@ def run_script():
     plt.contourf(xx, yy, Z, alpha=0.3, cmap=plt.cm.RdYlBu)
 
     # Plot the training points
-    for i, color in zip(range(len(classes)), plot_colors):
+    for i, color in zip(range(len(known_classes)), plot_colors):
         idx = np.where(y == i)
         plt.scatter(
             X[idx, 0],
@@ -99,10 +98,10 @@ def run_script():
 
     data = DataSpec()
     data.set_data(x=X, y=predictions)
-    data.set_y(to_categorical(data.y(), num_classes=number_of_classes(classes), dtype='float32'))
+    data.set_y(to_categorical(data.y(), num_classes=number_of_classes(known_classes), dtype='float32'))
 
     c2v = {}
-    for i in range(number_of_classes(classes)):
+    for i in range(number_of_classes(known_classes)):
         c2v[i] = X[predictions == i].tolist()
 
     layer2values = {2: X}
@@ -114,7 +113,7 @@ def run_script():
     history.set_ground_truths(all_y)
     history.set_layer2values({2: all_x})
     plot_2d_projection(history=history, monitor=monitor, layer=layer, category_title=model_name,
-                       known_classes=classes, novelty_marker="*", dimensions=[0, 1], novelty=novelty_X)
+                       known_classes=known_classes, novelty_marker="*", dimensions=[0, 1], novelty=novelty_X)
 
     save_all_figures()
 

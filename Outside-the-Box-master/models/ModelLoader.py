@@ -1,5 +1,6 @@
 from . import *
 from .iris import iris
+from .wine import wines
 
 
 def get_model_loader(name: str, model_path):
@@ -7,6 +8,8 @@ def get_model_loader(name: str, model_path):
         model_constructor = GTSRB_CNY19
     elif name == "iris":
         model_constructor = iris
+    elif name == "wine":
+        model_constructor = wines
     elif name == "MNIST":
         model_constructor = MNIST_CNY19
     elif name == "F_MNIST":

@@ -1,5 +1,6 @@
 from . import *
 from .iris import load_iris
+from .wine import load_wine
 
 
 def get_data_loader(string):
@@ -7,6 +8,8 @@ def get_data_loader(string):
         return load_GTSRB
     elif string == "iris":
         return load_iris
+    elif string == "wine":
+        return load_wine
     elif string == "CIFAR10":
         return load_CIFAR_10
     elif string == "MNIST":

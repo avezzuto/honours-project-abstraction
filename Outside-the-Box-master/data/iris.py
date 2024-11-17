@@ -1,7 +1,6 @@
 import csv
 import numpy as np
 
-from data import loadData, loadLabels
 from utils import DataSpec, load_data, filter_labels
 
 
@@ -17,8 +16,8 @@ def load_iris(data_train_model: DataSpec, data_test_model: DataSpec, data_train_
         next(reader)  # Skip the header
         dataset_train = np.array([row for row in reader])
 
-    x_train = dataset_train[:, :13].astype(float)
-    y_train = dataset_train[:, 13]
+    x_train = dataset_train[:, :4].astype(float)
+    y_train = dataset_train[:, 4]
 
     # Encode labels as integers
     _, y_train = np.unique(y_train, return_inverse=True)
@@ -29,8 +28,8 @@ def load_iris(data_train_model: DataSpec, data_test_model: DataSpec, data_train_
         next(reader)  # Skip the header
         dataset_test = np.array([row for row in reader])
 
-    x_test = dataset_test[:, :13].astype(float)
-    y_test = dataset_test[:, 13]
+    x_test = dataset_test[:, :4].astype(float)
+    y_test = dataset_test[:, 4]
 
     # Encode labels as integers
     _, y_test = np.unique(y_test, return_inverse=True)
