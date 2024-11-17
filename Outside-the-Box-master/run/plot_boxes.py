@@ -40,7 +40,7 @@ def run_script():
     layer2values, _ = obtain_predictions(model=model, data=data_run, layers=[layer])
     history.set_layer2values(layer2values)
 
-    pair = [1, 2]
+    pair = [0, 1]
     plot_colors = "ryb"
 
     all_y = np.array(history.ground_truths)
