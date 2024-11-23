@@ -1,6 +1,7 @@
 from . import *
 from .iris import load_iris
 from .wine import load_wine
+from .dermatology import load_dermatology
 
 
 def get_data_loader(string):
@@ -10,6 +11,8 @@ def get_data_loader(string):
         return load_iris
     elif string == "wine":
         return load_wine
+    elif string == "dermatology":
+        return load_dermatology
     elif string == "CIFAR10":
         return load_CIFAR_10
     elif string == "MNIST":

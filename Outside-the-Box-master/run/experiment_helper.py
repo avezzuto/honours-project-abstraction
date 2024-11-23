@@ -92,6 +92,14 @@ def instance_wine():
     return model_name, data_name, stored_network_name, total_classes
 
 
+def instance_dermatology():
+    model_name = "dermatology"
+    data_name = "dermatology"
+    stored_network_name = "dermatology_neural_network"
+    total_classes = 6
+    return model_name, data_name, stored_network_name, total_classes
+
+
 def instance_F_MNIST():
     model_name = "F_MNIST"
     data_name = "F_MNIST"
