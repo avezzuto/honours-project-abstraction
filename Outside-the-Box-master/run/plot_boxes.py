@@ -115,6 +115,33 @@ def run_script():
     plot_2d_projection(history=history, monitor=monitor, layer=layer, category_title=model_name,
                        known_classes=known_classes, novelty_marker="*", dimensions=[0, 1], novelty=novelty_X)
 
+    num_misclassified_novelties = 0
+    for point in novelty_X:
+        if monitor is not None:
+            for i, ai in enumerate(monitor.abstraction(layer).abstractions()):
+                if ai.isempty():
+                    continue
+                if ai.isknown(point, skip_confidence=True)[0]:
+                    num_misclassified_novelties += 1
+                    break
+
+    num_misclassified_known = 0
+    for i, point in enumerate(X):
+        if monitor is not None:
+            isKnown = False
+            for _, ai in enumerate(monitor.abstraction(layer).abstractions()):
+                if ai.isempty():
+                    continue
+                if ai.isknown(point, skip_confidence=True)[0]:
+                    isKnown = True
+                    break
+            if not isKnown:
+                num_misclassified_known += 1
+
+    print(f"Number of true positives: {len(novelty_X) - num_misclassified_novelties}")
+    print(f"Number of false negatives: {num_misclassified_novelties}")
+    print(f"Number of true negatives: {len(X) - num_misclassified_known}")
+    print(f"Number of false positives: {num_misclassified_known}")
     save_all_figures()
 
 
