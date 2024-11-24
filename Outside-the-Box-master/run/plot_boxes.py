@@ -1,4 +1,6 @@
+import numpy as np
 from sklearn.tree import DecisionTreeClassifier
+from sklearn.decomposition import PCA
 
 from data import *
 from run.experiment_helper import *
@@ -7,13 +9,13 @@ from trainers import StandardTrainer
 
 def run_script():
     model_name, data_name, stored_network_name, total_classes = instance_wine()
-    known_classes = [0, 1]
+    known_classes = np.arange(total_classes - 1)
     model_path = str(stored_network_name + ".h5")
     data_train_model = DataSpec(randomize=False, classes=known_classes)
     data_test_model = DataSpec(randomize=False, classes=known_classes)
     data_train_monitor = DataSpec(randomize=False, classes=known_classes)
     data_test_monitor = DataSpec(randomize=False, classes=known_classes)
-    data_run = DataSpec(randomize=False, classes=[0, 1, 2])
+    data_run = DataSpec(randomize=False, classes=np.arange(total_classes))
 
     all_classes_network, labels_network, all_classes_rest, labels_rest = get_data_loader(data_name)(
         data_train_model=data_train_model, data_test_model=data_test_model, data_train_monitor=data_train_monitor,
@@ -23,8 +25,10 @@ def run_script():
                          n_classes=total_classes, model_trainer=StandardTrainer(), n_epochs=100, batch_size=1,
                          statistics=Statistics(), model_path=model_path)
 
+    layer = 2
+
     # create monitor
-    layer2abstraction = {-2: OctagonAbstraction(euclidean_distance)}
+    layer2abstraction = {layer: OctagonAbstraction(euclidean_distance)}
     monitor = Monitor(layer2abstraction=layer2abstraction)
     monitor_manager = MonitorManager([monitor], n_clusters=2)
 
@@ -36,23 +40,26 @@ def run_script():
     # create plot
     history = History()
     history.set_ground_truths(data_run.ground_truths())
-    layer = 2
     layer2values, _ = obtain_predictions(model=model, data=data_run, layers=[layer])
     history.set_layer2values(layer2values)
 
-    pair = [0, 1]
+    pair = [0, 5]
     plot_colors = "ryb"
 
-    all_y = np.array(history.ground_truths)
-    all_x = np.array(history.layer2values[layer][:, pair])
+    pca = PCA(n_components=2)
 
-    X = all_x[(all_y == 0) | (all_y == 1)]
-    y = all_y[(all_y == 0) | (all_y == 1)]
+    all_y = np.array(history.ground_truths)
+    # all_x = np.array(history.layer2values[layer][:, pair])
+
+    all_x = pca.fit_transform(np.array(history.layer2values[layer]))
+
+    X = all_x[np.isin(all_y, known_classes)]
+    y = all_y[np.isin(all_y, known_classes)]
 
     novelty_X = all_x[(all_y == 2)]
 
     plot_2d_projection(history=history, monitor=monitor, layer=layer, category_title=model_name, known_classes=known_classes,
-                       novelty_marker="*", dimensions=[1, 2], novelty=novelty_X)
+                       novelty_marker="*", dimensions=[0, 1], novelty=novelty_X)
 
     # Train
     clf = DecisionTreeClassifier().fit(X, y)
@@ -104,14 +111,14 @@ def run_script():
     for i in range(number_of_classes(known_classes)):
         c2v[i] = X[predictions == i].tolist()
 
-    layer2values = {2: X}
+    layer2values = {layer: X}
     monitor_manager.n_clusters = 1
-    monitor_manager._layers = [2]
+    monitor_manager._layers = [layer]
     monitor_manager.refine_clusters(data_train=data, layer2values=layer2values,
                                     statistics=Statistics(), class2values=c2v)
 
     history.set_ground_truths(all_y)
-    history.set_layer2values({2: all_x})
+    history.set_layer2values({layer: all_x})
     plot_2d_projection(history=history, monitor=monitor, layer=layer, category_title=model_name,
                        known_classes=known_classes, novelty_marker="*", dimensions=[0, 1], novelty=novelty_X)
 
