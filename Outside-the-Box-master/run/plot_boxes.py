@@ -8,7 +8,7 @@ from trainers import StandardTrainer
 
 
 def run_script():
-    model_name, data_name, stored_network_name, total_classes = instance_dermatology()
+    model_name, data_name, stored_network_name, total_classes = instance_balance()
     known_classes = np.arange(total_classes - 1)
     model_path = str(stored_network_name + ".h5")
     data_train_model = DataSpec(randomize=False, classes=known_classes)
@@ -43,23 +43,21 @@ def run_script():
     layer2values, _ = obtain_predictions(model=model, data=data_run, layers=[layer])
     history.set_layer2values(layer2values)
 
-    pair = [0, 5]
     plot_colors = "ryb"
 
-    pca = PCA(n_components=2)
-
     all_y = np.array(history.ground_truths)
-    # all_x = np.array(history.layer2values[layer][:, pair])
+    all_x = np.array(history.layer2values[layer])
 
-    all_x = pca.fit_transform(np.array(history.layer2values[layer]))
-
-    X = all_x[np.isin(all_y, known_classes)]
-    y = all_y[np.isin(all_y, known_classes)]
-
-    novelty_X = all_x[(all_y == 5)]
+    novelty_X = all_x[(all_y == 2)]
 
     plot_2d_projection(history=history, monitor=monitor, layer=layer, category_title=model_name,
                        known_classes=known_classes, novelty_marker="*", dimensions=[0, 1], novelty=novelty_X)
+
+    pca = PCA(n_components=2)
+    all_x = pca.fit_transform(all_x)
+    X = all_x[np.isin(all_y, known_classes)]
+    y = all_y[np.isin(all_y, known_classes)]
+    novelty_X = all_x[(all_y == 2)]
 
     # Train
     clf = DecisionTreeClassifier().fit(X, y)

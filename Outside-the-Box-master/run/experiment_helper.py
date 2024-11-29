@@ -100,6 +100,14 @@ def instance_dermatology():
     return model_name, data_name, stored_network_name, total_classes
 
 
+def instance_balance():
+    model_name = "balance"
+    data_name = "balance"
+    stored_network_name = "balance_neural_network"
+    total_classes = 3
+    return model_name, data_name, stored_network_name, total_classes
+
+
 def instance_F_MNIST():
     model_name = "F_MNIST"
     data_name = "F_MNIST"
