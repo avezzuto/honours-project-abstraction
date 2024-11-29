@@ -17,8 +17,8 @@ def load_dermatology(data_train_model: DataSpec, data_test_model: DataSpec, data
         next(reader)  # Skip the header
         dataset_train = np.array([row for row in reader])
 
-    x_train = dataset_train[:, :2].astype(float)
-    y_train = dataset_train[:, 2]
+    x_train = dataset_train[:, :34].astype(float)
+    y_train = dataset_train[:, 34]
 
     # Encode labels as integers
     _, y_train = np.unique(y_train, return_inverse=True)
@@ -29,8 +29,8 @@ def load_dermatology(data_train_model: DataSpec, data_test_model: DataSpec, data
         next(reader)  # Skip the header
         dataset_test = np.array([row for row in reader])
 
-    x_test = dataset_test[:, :2].astype(float)
-    y_test = dataset_test[:, 2]
+    x_test = dataset_test[:, :34].astype(float)
+    y_test = dataset_test[:, 34]
 
     # Encode labels as integers
     _, y_test = np.unique(y_test, return_inverse=True)
@@ -52,7 +52,7 @@ def load_dermatology(data_train_model: DataSpec, data_test_model: DataSpec, data
     )
 
     # Define labels
-    labels_all = ['label' + str(i) for i in range(3)]
+    labels_all = ['label' + str(i) for i in range(max(all_classes_rest) + 1)]
 
     # Filter labels
     labels_network = filter_labels(labels_all, all_classes_network)

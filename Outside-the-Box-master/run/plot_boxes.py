@@ -8,7 +8,7 @@ from trainers import StandardTrainer
 
 
 def run_script():
-    model_name, data_name, stored_network_name, total_classes = instance_wine()
+    model_name, data_name, stored_network_name, total_classes = instance_dermatology()
     known_classes = np.arange(total_classes - 1)
     model_path = str(stored_network_name + ".h5")
     data_train_model = DataSpec(randomize=False, classes=known_classes)
@@ -30,7 +30,7 @@ def run_script():
     # create monitor
     layer2abstraction = {layer: OctagonAbstraction(euclidean_distance)}
     monitor = Monitor(layer2abstraction=layer2abstraction)
-    monitor_manager = MonitorManager([monitor], n_clusters=2)
+    monitor_manager = MonitorManager([monitor], n_clusters=len(known_classes))
 
     # run instance
     monitor_manager.normalize_and_initialize(model, len(labels_rest))
@@ -56,10 +56,10 @@ def run_script():
     X = all_x[np.isin(all_y, known_classes)]
     y = all_y[np.isin(all_y, known_classes)]
 
-    novelty_X = all_x[(all_y == 2)]
+    novelty_X = all_x[(all_y == 5)]
 
-    plot_2d_projection(history=history, monitor=monitor, layer=layer, category_title=model_name, known_classes=known_classes,
-                       novelty_marker="*", dimensions=[0, 1], novelty=novelty_X)
+    plot_2d_projection(history=history, monitor=monitor, layer=layer, category_title=model_name,
+                       known_classes=known_classes, novelty_marker="*", dimensions=[0, 1], novelty=novelty_X)
 
     # Train
     clf = DecisionTreeClassifier().fit(X, y)
