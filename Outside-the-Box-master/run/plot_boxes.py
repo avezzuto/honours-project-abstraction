@@ -8,7 +8,7 @@ from trainers import StandardTrainer
 
 
 def run_script():
-    model_name, data_name, stored_network_name, total_classes = instance_balance()
+    model_name, data_name, stored_network_name, total_classes = instance_dermatology()
     known_classes = np.arange(total_classes - 1)
     model_path = str(stored_network_name + ".h5")
     data_train_model = DataSpec(randomize=False, classes=known_classes)
@@ -48,26 +48,32 @@ def run_script():
     all_y = np.array(history.ground_truths)
     all_x = np.array(history.layer2values[layer])
 
-    novelty_X = all_x[(all_y == 2)]
+    novelty_X = all_x[(all_y == 5)]
 
     plot_2d_projection(history=history, monitor=monitor, layer=layer, category_title=model_name,
                        known_classes=known_classes, novelty_marker="*", dimensions=[0, 1], novelty=novelty_X)
 
     pca = PCA(n_components=2)
-    all_x = pca.fit_transform(all_x)
-    X = all_x[np.isin(all_y, known_classes)]
-    y = all_y[np.isin(all_y, known_classes)]
-    novelty_X = all_x[(all_y == 2)]
 
-    # Train
-    clf = DecisionTreeClassifier().fit(X, y)
+    training_data_x, _ = obtain_predictions(model=model, data=data_train_model, layers=[layer])
+    training_data_x = training_data_x.get(layer)
+    training_y = data_train_model.ground_truths()
+    training_data_x_pca = pca.fit_transform(training_data_x)
+    clf = DecisionTreeClassifier().fit(training_data_x_pca, training_y)
     tree = clf.tree_
+    predictions_training = clf.predict(training_data_x_pca)
 
     # Print the threshold values for each node in the tree
     for i in range(tree.node_count):
         if tree.children_left[i] != tree.children_right[i]:  # only print non-leaf nodes
             print(f"Node {i}: feature {tree.feature[i]} <= {tree.threshold[i]}")
-    predictions = clf.predict(X)
+
+    all_x = pca.transform(all_x)
+    X = all_x[np.isin(all_y, known_classes)]
+    y = all_y[np.isin(all_y, known_classes)]
+    novelty_X = all_x[(all_y == 5)]
+
+    predictions_testing = clf.predict(X)
 
     # Create a mesh grid
     x_min, x_max = X[:, 0].min() - 1, X[:, 0].max() + 1
@@ -101,11 +107,15 @@ def run_script():
     plt.title("Decision Boundary with Training Points")
     plt.show()
 
-    data = DataSpec()
-    data.set_data(x=X, y=predictions)
-    data.set_y(to_categorical(data.y(), num_classes=number_of_classes(known_classes), dtype='float32'))
+    data_train = DataSpec()
+    data_train.set_data(x=training_data_x_pca, y=predictions_training)
+    data_train.set_y(to_categorical(data_train.y(), num_classes=number_of_classes(known_classes), dtype='float32'))
 
-    c2v = {}
+    data_test = DataSpec()
+    data_test.set_data(x=X, y=predictions_testing)
+    data_test.set_y(to_categorical(data_test.y(), num_classes=number_of_classes(known_classes), dtype='float32'))
+
+    """c2v = {}
     for i in range(number_of_classes(known_classes)):
         c2v[i] = X[predictions == i].tolist()
 
@@ -115,6 +125,22 @@ def run_script():
     monitor_manager.refine_clusters(data_train=data, layer2values=layer2values,
                                     statistics=Statistics(), class2values=c2v)
 
+    history.set_ground_truths(all_y)
+    history.set_layer2values({layer: all_x})
+    plot_2d_projection(history=history, monitor=monitor, layer=layer, category_title=model_name,
+                       known_classes=known_classes, novelty_marker="*", dimensions=[0, 1], novelty=novelty_X)"""
+
+    c2v = {}
+    for i in range(number_of_classes(known_classes)):
+        c2v[i] = training_data_x_pca[predictions_training == i].tolist()
+
+    layer2values = {layer: training_data_x_pca}
+    monitor_manager.n_clusters = 1
+    monitor_manager._layers = [layer]
+    monitor_manager.refine_clusters(data_train=data_train, layer2values=layer2values,
+                                    statistics=Statistics(), class2values=c2v)
+
+    # create plot
     history.set_ground_truths(all_y)
     history.set_layer2values({layer: all_x})
     plot_2d_projection(history=history, monitor=monitor, layer=layer, category_title=model_name,
