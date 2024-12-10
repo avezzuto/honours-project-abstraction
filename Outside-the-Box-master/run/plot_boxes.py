@@ -115,21 +115,6 @@ def run_script():
     data_test.set_data(x=X, y=predictions_testing)
     data_test.set_y(to_categorical(data_test.y(), num_classes=number_of_classes(known_classes), dtype='float32'))
 
-    """c2v = {}
-    for i in range(number_of_classes(known_classes)):
-        c2v[i] = X[predictions == i].tolist()
-
-    layer2values = {layer: X}
-    monitor_manager.n_clusters = 1
-    monitor_manager._layers = [layer]
-    monitor_manager.refine_clusters(data_train=data, layer2values=layer2values,
-                                    statistics=Statistics(), class2values=c2v)
-
-    history.set_ground_truths(all_y)
-    history.set_layer2values({layer: all_x})
-    plot_2d_projection(history=history, monitor=monitor, layer=layer, category_title=model_name,
-                       known_classes=known_classes, novelty_marker="*", dimensions=[0, 1], novelty=novelty_X)"""
-
     c2v = {}
     for i in range(number_of_classes(known_classes)):
         c2v[i] = training_data_x_pca[predictions_training == i].tolist()
