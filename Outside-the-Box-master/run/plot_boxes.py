@@ -1,4 +1,3 @@
-import numpy as np
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.decomposition import PCA
 
@@ -7,15 +6,47 @@ from run.experiment_helper import *
 from trainers import StandardTrainer
 
 
+def compute_confusion_matrix(novelty_X, known_X, monitor, layer):
+    num_misclassified_novelties = 0
+    for point in novelty_X:
+        if monitor is not None:
+            for _, ai in enumerate(monitor.abstraction(layer).abstractions()):
+                if ai.isempty():
+                    continue
+                if ai.isknown(point[:2], skip_confidence=True)[0]:
+                    num_misclassified_novelties += 1
+                    break
+
+    num_misclassified_known = 0
+    for point in known_X:
+        if monitor is not None:
+            isKnown = False
+            for _, ai in enumerate(monitor.abstraction(layer).abstractions()):
+                if ai.isempty():
+                    continue
+                if ai.isknown(point[:2], skip_confidence=True)[0]:
+                    isKnown = True
+                    break
+            if not isKnown:
+                num_misclassified_known += 1
+
+    print(f"Number of true positives: {len(novelty_X) - num_misclassified_novelties}")
+    print(f"Number of false negatives: {num_misclassified_novelties}")
+    print(f"Number of true negatives: {len(known_X) - num_misclassified_known}")
+    print(f"Number of false positives: {num_misclassified_known}")
+
+
 def run_script():
-    model_name, data_name, stored_network_name, total_classes = instance_dermatology()
+    model_name, data_name, stored_network_name, total_classes = instance_iris()
     known_classes = np.arange(total_classes - 1)
+    all_classes = np.arange(total_classes)
+    novelty_class = list(set(all_classes) - set(known_classes))[0]
     model_path = str(stored_network_name + ".h5")
     data_train_model = DataSpec(randomize=False, classes=known_classes)
     data_test_model = DataSpec(randomize=False, classes=known_classes)
     data_train_monitor = DataSpec(randomize=False, classes=known_classes)
     data_test_monitor = DataSpec(randomize=False, classes=known_classes)
-    data_run = DataSpec(randomize=False, classes=np.arange(total_classes))
+    data_run = DataSpec(randomize=False, classes=all_classes)
 
     all_classes_network, labels_network, all_classes_rest, labels_rest = get_data_loader(data_name)(
         data_train_model=data_train_model, data_test_model=data_test_model, data_train_monitor=data_train_monitor,
@@ -48,10 +79,15 @@ def run_script():
     all_y = np.array(history.ground_truths)
     all_x = np.array(history.layer2values[layer])
 
-    novelty_X = all_x[(all_y == 5)]
+    novelty_X = all_x[(all_y == novelty_class)]
 
     plot_2d_projection(history=history, monitor=monitor, layer=layer, category_title=model_name,
                        known_classes=known_classes, novelty_marker="*", dimensions=[0, 1], novelty=novelty_X)
+
+    X = all_x[np.isin(all_y, known_classes)]
+
+    print("CONFUSION MATRIX BEFORE DECISION TREES")
+    compute_confusion_matrix(novelty_X=novelty_X, known_X=X, monitor=monitor, layer=layer)
 
     pca = PCA(n_components=2)
 
@@ -71,7 +107,7 @@ def run_script():
     all_x = pca.transform(all_x)
     X = all_x[np.isin(all_y, known_classes)]
     y = all_y[np.isin(all_y, known_classes)]
-    novelty_X = all_x[(all_y == 5)]
+    novelty_X = all_x[(all_y == novelty_class)]
 
     predictions_testing = clf.predict(X)
 
@@ -131,33 +167,8 @@ def run_script():
     plot_2d_projection(history=history, monitor=monitor, layer=layer, category_title=model_name,
                        known_classes=known_classes, novelty_marker="*", dimensions=[0, 1], novelty=novelty_X)
 
-    num_misclassified_novelties = 0
-    for point in novelty_X:
-        if monitor is not None:
-            for i, ai in enumerate(monitor.abstraction(layer).abstractions()):
-                if ai.isempty():
-                    continue
-                if ai.isknown(point, skip_confidence=True)[0]:
-                    num_misclassified_novelties += 1
-                    break
-
-    num_misclassified_known = 0
-    for i, point in enumerate(X):
-        if monitor is not None:
-            isKnown = False
-            for _, ai in enumerate(monitor.abstraction(layer).abstractions()):
-                if ai.isempty():
-                    continue
-                if ai.isknown(point, skip_confidence=True)[0]:
-                    isKnown = True
-                    break
-            if not isKnown:
-                num_misclassified_known += 1
-
-    print(f"Number of true positives: {len(novelty_X) - num_misclassified_novelties}")
-    print(f"Number of false negatives: {num_misclassified_novelties}")
-    print(f"Number of true negatives: {len(X) - num_misclassified_known}")
-    print(f"Number of false positives: {num_misclassified_known}")
+    print("CONFUSION MATRIX AFTER DECISION TREES")
+    compute_confusion_matrix(novelty_X=novelty_X, known_X=X, monitor=monitor, layer=layer)
     save_all_figures()
 
 
