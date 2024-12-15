@@ -6,14 +6,14 @@ from run.experiment_helper import *
 from trainers import StandardTrainer
 
 
-def compute_confusion_matrix(novelty_X, known_X, monitor, layer):
+def compute_confusion_matrix(novelty_X, known_X, monitor, layer, dimensions):
     num_misclassified_novelties = 0
     for point in novelty_X:
         if monitor is not None:
             for _, ai in enumerate(monitor.abstraction(layer).abstractions()):
                 if ai.isempty():
                     continue
-                if ai.isknown(point[:2], skip_confidence=True)[0]:
+                if ai.isknown([point[dimensions[0]], point[dimensions[1]]], skip_confidence=True)[0]:
                     num_misclassified_novelties += 1
                     break
 
@@ -24,7 +24,7 @@ def compute_confusion_matrix(novelty_X, known_X, monitor, layer):
             for _, ai in enumerate(monitor.abstraction(layer).abstractions()):
                 if ai.isempty():
                     continue
-                if ai.isknown(point[:2], skip_confidence=True)[0]:
+                if ai.isknown([point[dimensions[0]], point[dimensions[1]]], skip_confidence=True)[0]:
                     isKnown = True
                     break
             if not isKnown:
@@ -37,11 +37,12 @@ def compute_confusion_matrix(novelty_X, known_X, monitor, layer):
 
 
 def run_script():
-    model_name, data_name, stored_network_name, total_classes = instance_iris()
+    model_name, data_name, stored_network_name, total_classes = instance_dermatology()
     known_classes = np.arange(total_classes - 1)
     all_classes = np.arange(total_classes)
     novelty_class = list(set(all_classes) - set(known_classes))[0]
     model_path = str(stored_network_name + ".h5")
+    dimensions = [0, 1]
     data_train_model = DataSpec(randomize=False, classes=known_classes)
     data_test_model = DataSpec(randomize=False, classes=known_classes)
     data_train_monitor = DataSpec(randomize=False, classes=known_classes)
@@ -56,17 +57,17 @@ def run_script():
                          n_classes=total_classes, model_trainer=StandardTrainer(), n_epochs=100, batch_size=1,
                          statistics=Statistics(), model_path=model_path)
 
-    layer = 2
+    layer = 4
 
     # create monitor
     layer2abstraction = {layer: OctagonAbstraction(euclidean_distance)}
     monitor = Monitor(layer2abstraction=layer2abstraction)
-    monitor_manager = MonitorManager([monitor], n_clusters=len(known_classes))
+    monitor_manager = MonitorManager([monitor], n_clusters=1)
 
     # run instance
     monitor_manager.normalize_and_initialize(model, len(labels_rest))
     monitor_manager.train(model=model, data_train=data_train_monitor, data_test=data_test_monitor,
-                          statistics=Statistics())
+                          statistics=Statistics(), ignore_misclassifications=False)
 
     # create plot
     history = History()
@@ -74,20 +75,38 @@ def run_script():
     layer2values, _ = obtain_predictions(model=model, data=data_run, layers=[layer])
     history.set_layer2values(layer2values)
 
-    plot_colors = "ryb"
-
     all_y = np.array(history.ground_truths)
     all_x = np.array(history.layer2values[layer])
-
     novelty_X = all_x[(all_y == novelty_class)]
 
     plot_2d_projection(history=history, monitor=monitor, layer=layer, category_title=model_name,
-                       known_classes=known_classes, novelty_marker="*", dimensions=[0, 1], novelty=novelty_X)
+                       known_classes=known_classes, novelty_marker="*", dimensions=dimensions, novelty=novelty_X)
 
     X = all_x[np.isin(all_y, known_classes)]
 
     print("CONFUSION MATRIX BEFORE DECISION TREES")
-    compute_confusion_matrix(novelty_X=novelty_X, known_X=X, monitor=monitor, layer=layer)
+    compute_confusion_matrix(novelty_X=novelty_X, known_X=X, monitor=monitor, layer=layer, dimensions=dimensions)
+
+    # create monitor for new clustering
+    layer2abstraction = {layer: OctagonAbstraction(euclidean_distance)}
+    monitor = Monitor(layer2abstraction=layer2abstraction)
+    monitor_manager = MonitorManager([monitor], n_clusters=len(known_classes))
+
+    monitor_manager.normalize_and_initialize(model, len(labels_rest))
+    monitor_manager.train(model=model, data_train=data_train_monitor, data_test=data_test_monitor,
+                          statistics=Statistics(), ignore_misclassifications=False)
+
+    # create plot
+    history = History()
+    history.set_ground_truths(data_run.ground_truths())
+    layer2values, _ = obtain_predictions(model=model, data=data_run, layers=[layer])
+    history.set_layer2values(layer2values)
+
+    all_y = np.array(history.ground_truths)
+    all_x = np.array(history.layer2values[layer])
+    novelty_X = all_x[(all_y == novelty_class)]
+
+    X = all_x[np.isin(all_y, known_classes)]
 
     pca = PCA(n_components=2)
 
@@ -99,6 +118,7 @@ def run_script():
     tree = clf.tree_
     predictions_training = clf.predict(training_data_x_pca)
 
+    plot_colors = "ryb"
     # Print the threshold values for each node in the tree
     for i in range(tree.node_count):
         if tree.children_left[i] != tree.children_right[i]:  # only print non-leaf nodes
@@ -168,7 +188,7 @@ def run_script():
                        known_classes=known_classes, novelty_marker="*", dimensions=[0, 1], novelty=novelty_X)
 
     print("CONFUSION MATRIX AFTER DECISION TREES")
-    compute_confusion_matrix(novelty_X=novelty_X, known_X=X, monitor=monitor, layer=layer)
+    compute_confusion_matrix(novelty_X=novelty_X, known_X=X, monitor=monitor, layer=layer, dimensions=[0, 1])
     save_all_figures()
 
 
