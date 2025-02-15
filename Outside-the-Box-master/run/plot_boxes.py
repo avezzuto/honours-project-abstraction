@@ -114,7 +114,7 @@ def run_script():
     training_data_x = training_data_x.get(layer)
     training_y = data_train_model.ground_truths()
     training_data_x_pca = pca.fit_transform(training_data_x)
-    clf = DecisionTreeClassifier(ccp_alpha=0.01).fit(training_data_x_pca, training_y)
+    clf = DecisionTreeClassifier(ccp_alpha=0.02).fit(training_data_x_pca, training_y)
     tree = clf.tree_
     predictions_training = clf.predict(training_data_x_pca)
 
