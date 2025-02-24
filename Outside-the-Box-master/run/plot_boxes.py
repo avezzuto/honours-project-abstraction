@@ -37,7 +37,7 @@ def compute_confusion_matrix(novelty_X, known_X, monitor, layer, dimensions):
 
 
 def run_script():
-    model_name, data_name, stored_network_name, total_classes = instance_dermatology()
+    model_name, data_name, stored_network_name, total_classes = instance_wine()
     known_classes = np.arange(total_classes - 1)
     all_classes = np.arange(total_classes)
     novelty_class = list(set(all_classes) - set(known_classes))[0]
@@ -57,7 +57,7 @@ def run_script():
                          n_classes=total_classes, model_trainer=StandardTrainer(), n_epochs=100, batch_size=1,
                          statistics=Statistics(), model_path=model_path)
 
-    layer = 4
+    layer = 1
 
     # create monitor
     layer2abstraction = {layer: OctagonAbstraction(euclidean_distance)}
